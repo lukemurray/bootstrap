@@ -26,7 +26,7 @@ Sets the default global options for your application. Options can be overridden 
 Example:
 
     var app = angular.module('App', ['ui.bootstrap.dialog'] , function($dialogProvider){
-        $dialogProvider.options({backdropClick: false, modalFade: true});
+        $dialogProvider.options({backdropClick: false, dialogFade: true});
     });
 
 # $dialog service
@@ -45,7 +45,7 @@ Example:
 
     app.controller('MainCtrl', function($dialog, $scope) {
         $scope.openItemEditor = function(item){
-            var d = $dialog.dialog({modalFade: false, resolve: {item: function(){ return angular.copy(item); } }});
+            var d = $dialog.dialog({dialogFade: false, resolve: {item: function(){ return angular.copy(item); } }});
             d.open('dialogs/item-editor.html', 'EditItemController');
         };
     });
@@ -90,4 +90,8 @@ The dialog object returned by the `$dialog` service methods `open` and `message`
 #### `close([result])`
 
 Closes the dialog. Optionally a result can be specified. The result is used to resolve the promise returned by the `open` method.
+
+#### `isOpen`
+
+Returns true if the dialog is shown, else returns false.
 

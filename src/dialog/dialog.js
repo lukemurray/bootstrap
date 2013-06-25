@@ -20,7 +20,6 @@ dialogModule.provider("$dialog", function(){
     backdropClass: 'modal-backdrop',
     transitionClass: 'fade',
     triggerClass: 'in',
-    dialogOpenClass: 'modal-open',  
     resolve:{},
     backdropFade: false,
     dialogFade:false,
@@ -93,6 +92,10 @@ dialogModule.provider("$dialog", function(){
         e.preventDefault();
         self.$scope.$apply();
       };
+
+      this.handleLocationChange = function() {
+        self.close();
+      };
     }
 
     // The `isOpen()` method returns wether the dialog is currently visible.
@@ -123,12 +126,11 @@ dialogModule.provider("$dialog", function(){
 
         if (self.options.controller) {
           var ctrl = $controller(self.options.controller, locals);
-          self.modalEl.contents().data('ngControllerController', ctrl);
+          self.modalEl.children().data('ngControllerController', ctrl);
         }
 
         $compile(self.modalEl)($scope);
         self._addElementsToDom();
-        body.addClass(self.options.dialogOpenClass);
 
         // trigger tranisitions
         setTimeout(function(){
@@ -148,7 +150,6 @@ dialogModule.provider("$dialog", function(){
       var self = this;
       var fadingElements = this._getFadingElements();
 
-      body.removeClass(self.options.dialogOpenClass);
       if(fadingElements.length > 0){
         for (var i = fadingElements.length - 1; i >= 0; i--) {
           $transition(fadingElements[i], removeTriggerClass).then(onCloseComplete);

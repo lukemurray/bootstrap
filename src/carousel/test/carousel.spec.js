@@ -20,7 +20,7 @@ describe('carousel', function() {
         {active:false,content:'three'}
       ];
       elm = $compile(
-        '<carousel interval="interval" no-transition="true">' +
+        '<carousel interval="interval" no-transition="true" no-pause="nopause">' +
           '<slide ng-repeat="slide in slides" active="slide.active">' +
             '{{slide.content}}' +
           '</slide>' +
@@ -28,6 +28,7 @@ describe('carousel', function() {
       )(scope);
       carouselScope = elm.scope();
       scope.interval = 5000;
+      scope.nopause = undefined;
       scope.$apply();
     });
     afterEach(function() {
@@ -178,13 +179,26 @@ describe('carousel', function() {
       $timeout.flush();
       testSlideActive(2);
     });
+    
+    it('should not pause on mouseover if noPause', function() {
+      scope.$apply('nopause = true');
+      testSlideActive(0);
+      elm.trigger('mouseenter');
+      $timeout.flush();
+      testSlideActive(1);
+      elm.trigger('mouseleave');
+      $timeout.flush();
+      testSlideActive(2);
+    });    
 
     it('should remove slide from dom and change active slide', function() {
-      scope.$apply('slides[1].active = true');
-      testSlideActive(1);
-      scope.$apply('slides.splice(1,1)');
+      scope.$apply('slides[2].active = true');
+      testSlideActive(2);
+      scope.$apply('slides.splice(0,1)');
       expect(elm.find('div.item').length).toBe(2);
       testSlideActive(1);
+      $timeout.flush();
+      testSlideActive(0);
       scope.$apply('slides.splice(1,1)');
       expect(elm.find('div.item').length).toBe(1);
       testSlideActive(0);
@@ -204,6 +218,21 @@ describe('carousel', function() {
       expect(contents.eq(0).text()).toBe('new2');
       expect(contents.eq(0)).toHaveClass('active');
       expect(contents.eq(1).text()).toBe('new3');
+    });
+
+    it('should not change if next is clicked while transitioning', function() {
+      var carouselScope = elm.children().scope();
+      var next = elm.find('a.right');
+
+      testSlideActive(0);
+      carouselScope.$currentTransition = true;
+      next.click();
+
+      testSlideActive(0);
+
+      carouselScope.$currentTransition = null;
+      next.click();
+      testSlideActive(1);
     });
   });
 

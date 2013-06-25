@@ -12,6 +12,8 @@
       nunc sed velit dignissim sodales ut eu sem integer vitae. Turpis egestas 
       <a><span tooltip-placement="bottom" tooltip="On the Bottom!">bottom</span></a> 
       pharetra convallis posuere morbi leo urna, 
+      <a><span tooltip-placement="mouse" tooltip="relative to mouse">mouse</span></a> 
+      blah blah blah, 
       <a><span tooltip-animation="false" tooltip="I don't fade. :-(">fading</span></a> 
       at elementum eu, facilisis sed odio morbi quis commodo odio. In cursus
       <a><span tooltip-popup-delay='1000' tooltip='appears with delay'>delayed</span></a> turpis massa tincidunt dui ut.
@@ -19,6 +21,13 @@
 
     <p>
       I can even contain HTML. <a><span tooltip-html-unsafe="{{htmlTooltip}}">Check me out!</span></a>
+    </p>
+    <p>
+      Or use custom triggers, like focus: 
+      <input type="text" value="Click me!"
+        tooltip="See? Now click away..." 
+        tooltip-trigger="focus"
+        tooltip-placement="right" />
     </p>
   </div>
 </div>

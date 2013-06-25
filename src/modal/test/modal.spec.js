@@ -99,12 +99,10 @@ describe('Give ui.boostrap.modal', function() {
 	});
 
 	it('should use global $dialog options', function() {
-		provider.options({dialogOpenClass: 'test-open-modal'});
 		elm = $compile(templateGenerator('modalShown'))($scope);
 		expect($document.find('.test-open-modal').length).toBe(0);
 		$scope.$apply('modalShown = true');
 		expect($document.find('body > div.modal').length).toBe(1);
-		expect($document.find('.test-open-modal').length).not.toBe(0);
 		$scope.$apply('modalShown = false');
 	});
 
@@ -169,5 +167,5 @@ describe('Give ui.boostrap.modal', function() {
 			$scope.$digest();
 			expect($scope.modalShown).not.toBeTruthy();
 		});
-	});		
+	});
 });

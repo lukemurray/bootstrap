@@ -200,7 +200,7 @@ describe('typeahead tests', function () {
     };
 
     var findDropDown = function(element) {
-      return element.find('div.dropdown');
+      return element.find('ul.typeahead');
     };
 
     var findMatches = function(element) {
@@ -222,7 +222,7 @@ describe('typeahead tests', function () {
           this.message = function() {
             return "Expected '" + angular.mock.dump(this.actual) + "' to be closed.";
           };
-          return !typeaheadEl.hasClass('open') && findMatches(this.actual).length === 0;
+          return typeaheadEl.css('display')==='none' && findMatches(this.actual).length === 0;
 
         }, toBeOpenWithActive: function(noOfMatches, activeIdx) {
 
@@ -232,7 +232,7 @@ describe('typeahead tests', function () {
           this.message = function() {
             return "Expected '" + angular.mock.dump(this.actual) + "' to be opened.";
           };
-          return typeaheadEl.hasClass('open') && liEls.length === noOfMatches && $(liEls[activeIdx]).hasClass('active');
+          return typeaheadEl.css('display')==='block' && liEls.length === noOfMatches && $(liEls[activeIdx]).hasClass('active');
         }
       });
     });
@@ -326,6 +326,16 @@ describe('typeahead tests', function () {
         $timeout.flush();
         expect($scope.isLoading).toBeFalsy();
       }));
+
+      it('should support timeout before trying to match $viewValue', inject(function ($timeout) {
+
+        var element = prepareInputEl("<div><input ng-model='result' typeahead='item for item in source | filter:$viewValue' typeahead-wait-ms='200'></div>");
+        changeInputValueTo(element, 'foo');
+        expect(element).toBeClosed();
+
+        $timeout.flush();
+        expect(element).toBeOpenWithActive(1, 0);
+      }));
     });
 
     describe('selecting a match', function () {
@@ -369,6 +379,29 @@ describe('typeahead tests', function () {
         expect(inputEl.val()).toEqual('baz');
       });
 
+      it('should invoke select callback on select', function () {
+
+        $scope.states = [
+          {code: 'AL', name: 'Alaska'},
+          {code: 'CL', name: 'California'}
+        ];
+        $scope.onSelect = function ($item, $model, $label) {
+          $scope.$item = $item;
+          $scope.$model = $model;
+          $scope.$label = $label;
+        };
+        var element = prepareInputEl("<div><input ng-model='result' typeahead-on-select='onSelect($item, $model, $label)' typeahead='state.code as state.name for state in states | filter:$viewValue'></div>");
+        var inputEl = findInput(element);
+
+        changeInputValueTo(element, 'Alas');
+        triggerKeyDown(element, 13);
+
+        expect($scope.result).toEqual('AL');
+        expect($scope.$item).toEqual($scope.states[0]);
+        expect($scope.$model).toEqual('AL');
+        expect($scope.$label).toEqual('Alaska');
+      });
+
       it('should correctly update inputs value on mapping where label is not derived from the model', function () {
 
         $scope.states = [{code: 'AL', name: 'Alaska'}, {code: 'CL', name: 'California'}];
@@ -391,12 +424,11 @@ describe('typeahead tests', function () {
         var inputEl = findInput(element);
 
         changeInputValueTo(element, 'b');
-        var dropdown = findDropDown(element);
 
         $document.find('body').click();
         $scope.$digest();
 
-        expect(dropdown).not.toHaveClass('open');
+        expect(element).toBeClosed();
       });
     });
 

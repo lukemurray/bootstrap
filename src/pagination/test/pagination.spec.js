@@ -190,6 +190,85 @@ describe('pagination directive with max size option', function () {
     expect($rootScope.maxSize).toBe(15);
   });
 
+  it('should not display page numbers, if max-size is zero', function() {
+    $rootScope.maxSize = 0;
+    $rootScope.$digest();
+    expect(element.find('li').length).toBe(2);
+    expect(element.find('li').eq(0).text()).toBe('Previous');
+    expect(element.find('li').eq(-1).text()).toBe('Next');
+  });
+
+});
+
+describe('pagination directive with max size option & no rotate', function () {
+  var $rootScope, element;
+  beforeEach(module('ui.bootstrap.pagination'));
+  beforeEach(module('template/pagination/pagination.html'));
+  beforeEach(inject(function(_$compile_, _$rootScope_) {
+    $compile = _$compile_;
+    $rootScope = _$rootScope_;
+    $rootScope.numPages = 12;
+    $rootScope.currentPage = 7;
+    $rootScope.maxSize = 5;
+    element = $compile('<pagination num-pages="numPages" current-page="currentPage" max-size="maxSize" rotate="false"></pagination>')($rootScope);
+    $rootScope.$digest();
+  }));
+
+  it('contains one ul and maxsize + 4 elements', function() {
+    expect(element.find('ul').length).toBe(1);
+    expect(element.find('li').length).toBe($rootScope.maxSize + 4);
+    expect(element.find('li').eq(0).text()).toBe('Previous');
+    expect(element.find('li').eq(1).text()).toBe('...');
+    expect(element.find('li').eq(2).text()).toBe('6');
+    expect(element.find('li').eq(-3).text()).toBe('10');
+    expect(element.find('li').eq(-2).text()).toBe('...');
+    expect(element.find('li').eq(-1).text()).toBe('Next');
+  });
+
+  it('shows only the next ellipsis element on first page set', function() {
+    $rootScope.currentPage = 3;
+    $rootScope.$digest();
+    expect(element.find('li').eq(1).text()).toBe('1');
+    expect(element.find('li').eq(-3).text()).toBe('5');
+    expect(element.find('li').eq(-2).text()).toBe('...');
+  });
+
+  it('shows only the previous ellipsis element on last page set', function() {
+    $rootScope.currentPage = 12;
+    $rootScope.$digest();
+    expect(element.find('li').length).toBe(5);
+    expect(element.find('li').eq(1).text()).toBe('...');
+    expect(element.find('li').eq(2).text()).toBe('11');
+    expect(element.find('li').eq(-2).text()).toBe('12');
+  });
+
+  it('moves to the previous set when first ellipsis is clicked', function() {
+    var prev = element.find('li').eq(1).find('a').eq(0);
+    expect(prev.text()).toBe('...');
+
+    prev.click();
+    expect($rootScope.currentPage).toBe(5);
+    var currentPageItem = element.find('li').eq(-3);
+    expect(currentPageItem.hasClass('active')).toBe(true);
+  });
+
+  it('moves to the next set when last ellipsis is clicked', function() {
+    var next = element.find('li').eq(-2).find('a').eq(0);
+    expect(next.text()).toBe('...');
+
+    next.click();
+    expect($rootScope.currentPage).toBe(11);
+    var currentPageItem = element.find('li').eq(2);
+    expect(currentPageItem.hasClass('active')).toBe(true);
+  });
+
+  it('should not display page numbers, if max-size is zero', function() {
+    $rootScope.maxSize = 0;
+    $rootScope.$digest();
+    expect(element.find('li').length).toBe(2);
+    expect(element.find('li').eq(0).text()).toBe('Previous');
+    expect(element.find('li').eq(-1).text()).toBe('Next');
+  });
 });
 
 describe('pagination directive with added first & last links', function () {
@@ -274,7 +353,7 @@ describe('pagination directive with added first & last links', function () {
   });
 
   it('changes "first" & "last" text from attributes', function() {
-    element = $compile('<pagination boundary-links="true" first-text="<<<" last-text=">>>" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
+    element = $compile('<pagination boundary-links="true" first-text="\'<<<\'" last-text="\'>>>\'" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
     $rootScope.$digest();
 
     expect(element.find('li').eq(0).text()).toBe('<<<');
@@ -282,7 +361,27 @@ describe('pagination directive with added first & last links', function () {
   });
 
   it('changes "previous" & "next" text from attributes', function() {
-    element = $compile('<pagination boundary-links="true" previous-text="<<" next-text=">>" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
+    element = $compile('<pagination boundary-links="true" previous-text="\'<<\'" next-text="\'>>\'" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
+    $rootScope.$digest();
+
+    expect(element.find('li').eq(1).text()).toBe('<<');
+    expect(element.find('li').eq(-2).text()).toBe('>>');
+  });
+
+  it('changes "first" & "last" text from attribute variables', function() {
+    $rootScope.myfirstText = '<<<';
+    $rootScope.mylastText = '>>>';
+    element = $compile('<pagination boundary-links="true" first-text="myfirstText" last-text="mylastText" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
+    $rootScope.$digest();
+
+    expect(element.find('li').eq(0).text()).toBe('<<<');
+    expect(element.find('li').eq(-1).text()).toBe('>>>');
+  });
+
+  it('changes "previous" & "next" text from attribute variables', function() {
+    $rootScope.previousText = '<<';
+    $rootScope.nextText = '>>';
+    element = $compile('<pagination boundary-links="true" previous-text="previousText" next-text="nextText" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
     $rootScope.$digest();
 
     expect(element.find('li').eq(1).text()).toBe('<<');
@@ -487,7 +586,7 @@ describe('pagination bypass configuration from attributes', function () {
     $rootScope = _$rootScope_;
     $rootScope.numPages = 5;
     $rootScope.currentPage = 3;
-    element = $compile('<pagination boundary-links="true" first-text="<<" previous-text="<" next-text=">" last-text=">>" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
+    element = $compile('<pagination boundary-links="true" first-text="\'<<\'" previous-text="\'<\'" next-text="\'>\'" last-text="\'>>\'" num-pages="numPages" current-page="currentPage"></pagination>')($rootScope);
     $rootScope.$digest();
   }));
 
