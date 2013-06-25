@@ -11,8 +11,11 @@ describe('dropdownToggle', function() {
 
   }));
 
-  function dropdown() {
-    return $compile('<li class="dropdown"><a dropdown-toggle></a><ul dropdown-toggle><li>Hello</li></ul></li>')($rootScope);
+  function dropdown(closeOnClick) {
+    if (closeOnClick === undefined) {
+      closeOnClick = true;
+    }
+    return $compile('<li class="dropdown"><a dropdown-toggle close-on-click="' + closeOnClick + '"></a><ul dropdown-toggle close-on-click="' + closeOnClick + '"><li>Hello</li></ul><div class="dropdown-menu"></div></li>')($rootScope);
   }
   
   it('should toggle on `a` click', function() {
@@ -62,6 +65,22 @@ describe('dropdownToggle', function() {
     elm2.find('a').click();
     expect(elm1.hasClass('open')).toBe(false);
     expect(elm2.hasClass('open')).toBe(true);
+  });
+
+  it('should not close on click in dropdown-menu when close-on-click="false"', function() {
+    var elm1 = dropdown(false);
+    elm1.find('a').click();
+    expect(elm1.hasClass('open')).toBe(true);
+    elm1.parent().find('div').click(); // dropdown-menu
+    expect(elm1.hasClass('open')).toBe(true);
+  });
+
+  it('should still close on click (outside popup) when close-on-click="false"', function() {
+    var elm1 = dropdown(false);
+    elm1.find('ul').click();
+    expect(elm1.hasClass('open')).toBe(true);
+    elm1.click();
+    expect(elm1.hasClass('open')).toBe(false);
   });
 });
   

@@ -3,7 +3,7 @@
  * @restrict class or attribute
  * @example:
    <li class="dropdown">
-     <a class="dropdown-toggle">My Dropdown Menu</a>
+     <a class="dropdown-toggle" close-on-click="true|false">My Dropdown Menu</a>
      <ul class="dropdown-menu">
        <li ng-repeat="choice in dropChoices">
          <a ng-href="{{choice.href}}">{{choice.text}}</a>
@@ -20,8 +20,20 @@ angular.module('ui.bootstrap.dropdownToggle', []).directive('dropdownToggle', ['
     link: function(scope, element, attrs) {
       scope.$watch('$location.path', function() { closeMenu(); });
       element.parent().bind('click', function() { closeMenu(); });
-      element.bind('click', function (event) {
 
+      var closeOnClick = angular.isDefined(attrs.closeOnClick) ? scope.$eval(attrs.closeOnClick) : true;
+      if (closeOnClick === false) {
+        angular.forEach(element.parent().children(), function(ele) {
+          var aEle = angular.element(ele);
+          if (aEle.hasClass('dropdown-menu')) {
+            aEle.bind('click', function() {
+              event.stopPropagation();
+            });
+          }
+        });
+      }
+
+      element.bind('click', function (event) {
         var elementWasOpen = (element === openElement);
 
         event.preventDefault();
